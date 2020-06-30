@@ -1,10 +1,6 @@
 from app import app
-
-
-@app.route('/')
-def index():
-    return 'ok'
-
+from routes import api
+app.register_blueprint(api, url_prefix='/api/v1.0')
 
 if __name__ == "__main__":
     app.run()
