@@ -1,5 +1,6 @@
 import requests
 from exceptions import InvalidData
+from time import sleep
 
 URL = 'https://api.vk.com/method/'
 
@@ -18,14 +19,15 @@ class LongPollConnect():
         except:
             raise InvalidData
 
-    def __init__(self, token, version_api, group_id):
+    def __init__(self, token, version_api, group_id, limit=7):
         self.method = 'groups.getLongPollServer'
         self.url = URL + self.method
         self.token = token
         self.version_api = version_api
         self.group_id = group_id
         self.connect = self.get_data_for_connect()
-        self.get_new_event()
+        self.data = []
+        self.limit = limit
 
     def check_new_event(self):
         server = self.connect['server']
@@ -41,10 +43,12 @@ class LongPollConnect():
             self.connect['ts'] = str(new_ts)
             data = data.json()
             try:
-                if data['failed'] == 1:
+                failed = data['failed']
+                if failed == 1:
                     new_ts = data['ts']
                     self.connect['ts'] = new_ts
-                elif data['failed'] == 2:
+                    print('faild1')
+                elif failed == 2:
                     new_key = get_data_for_connect['key']
                     self.connect['key'] = new_key
                     print('faild2')
@@ -57,5 +61,20 @@ class LongPollConnect():
                     print('faild3')
                     print()
             except:
-                self.data = data
-                print(data)
+                return self.data.append(data)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.delite()
+        return next(self.get())
+
+    def get(self):
+        while True:
+            self.get_new_event()
+            yield self.data
+
+    def delite(self, num=0):
+        if len(self.data) >= self.limit:
+            self.data.pop(num)
