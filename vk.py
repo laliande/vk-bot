@@ -4,8 +4,14 @@ from time import sleep
 
 URL = 'https://api.vk.com/method/'
 
+# establishes a connection and accepts messages
+# input: token (str), server's url (str), verlion api (str or int), group id (str or int).
+# Optional input: limit (default=7) sets the max number of messages to return.
+
 
 class LongPollConnect():
+    # returns data for connection
+    # output: data for API connection (dict)
     def get_data_for_connect(self):
         params = {'group_id': self.group_id,
                   'access_token': self.token, 'v': self.version_api}
@@ -29,6 +35,8 @@ class LongPollConnect():
         self.data = []
         self.limit = limit
 
+    # check and return an event about new messages in the chat
+    # output: API data about new event (dict)
     def check_new_event(self):
         server = self.connect['server']
         params = {'act': 'a_check',
@@ -36,7 +44,9 @@ class LongPollConnect():
         data = requests.post(url=server, params=params)
         return data
 
-    def get_new_event(self):
+    # getting and processing new events
+    # output: a class field with data about new events (list)
+    def process_new_event(self):
         while True:
             data = self.check_new_event()
             new_ts = int(self.connect['ts']) + 1
@@ -70,11 +80,15 @@ class LongPollConnect():
         self.delite()
         return next(self.get())
 
+    # continuously listens for events about new messages
+    # output: returns the generator
     def get(self):
         while True:
-            self.get_new_event()
+            self.process_new_event()
             yield self.data
 
+    # removes messages that have been read from the array
+    # input: num (default = 0) specifies which message to delete from the array
     def delite(self, num=0):
         if len(self.data) >= self.limit:
             self.data.pop(num)
