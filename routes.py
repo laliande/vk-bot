@@ -6,7 +6,7 @@ from responses import Responses, bad_data, bad_mimetype, good_data
 api = Blueprint('api', __name__)
 
 
-@api.route('/getDataAboutGroup', methods=['POST'])
+@api.route('/sendDataAboutGroup', methods=['POST'])
 def getDataAboutGroup():
     data = request.get_json()
     if data is None:
