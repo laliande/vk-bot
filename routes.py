@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask import request
 from json import dumps, dump
-from responses import Responses, bad_data, bad_mimetype, good_data
+from responses import bad_data, bad_mimetype, good_data
 from validation import ValidationForMessages, ValidationForGroup
 
 api = Blueprint('api', __name__)

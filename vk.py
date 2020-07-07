@@ -88,7 +88,37 @@ class LongPollConnect():
             yield self.data
 
     # removes messages that have been read from the array
-    # input: num (default = 0) specifies which message to delete from the array
-    def delite(self, num=0):
+    # input: num (default = 0) specifies which message to delete from the array.
+    #        forced (default=False) - allows you to delete an item even if the limit is not reached
+    def delite(self, forced=False, num=0):
         if len(self.data) >= self.limit:
+            self.data.pop(0)
+        elif forced:
             self.data.pop(num)
+
+
+class Answer(LongPollConnect):
+    def __init__(self, answers, token, group_id, version_api):
+        super().__init__(token=token, version_api=version_api, group_id=group_id)
+        self.answers = answers
+
+    def get_data_about_event(self, event):
+        keyboard = bool(event['updates'][0]['object']
+                             ['client_info']['keyboard'])
+        inline = bool(event['updates'][0]['object']
+                           ['client_info']['inline_keyboard'])
+        carousel = bool(event['updates'][0]
+                             ['object']['client_info']['carousel'])
+        from_id = event['updates'][0]['object']['message']['from_id']
+        text = event['updates'][0]['object']['message']['text']
+        return [keyboard, inline, carousel, from_id, text]
+
+    def send_answer(self, about_event):
+        print(about_event)
+
+    def process_message(self):
+        while True:
+            next(self)
+            about_event = self.get_data_about_event(event=self.data[0])
+            self.send_answer(about_event=about_event)
+            self.delite(forced=True)
