@@ -7,7 +7,7 @@ api = Blueprint('api', __name__)
 
 
 @api.route('/sendDataAboutGroup', methods=['POST'])
-def getDataAboutGroup():
+def get_data_about_group():
     data = request.get_json()
     if data is None:
         return bad_mimetype
@@ -22,3 +22,8 @@ def getDataAboutGroup():
             return good_data
         except:
             return bad_data
+
+
+@api.route('/sendDataAboutMessages', methods=['POST'])
+def get_data_about_messages():
+    pass

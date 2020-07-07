@@ -1,0 +1,126 @@
+{
+    "elements": [
+        {
+            "buttons": [
+                {
+                    "button_id": 1,
+                    "type": "inline",
+                    "color": "primary",
+                    "text": "text",
+                    "link": "link",
+                    "one_time": "False",
+                    "action": "text",
+                    "if_no_button_type": "standart",
+                    "if_no_button": 1
+                }
+            ],
+            "messages": [
+                {
+                    "message_id": 1,
+                    "text": "some text",
+                    "attach": "attach"
+                }
+            ],
+            "corusels": [
+                {
+                    "title": "title",
+                    "description": "description",
+                    "photo_id": "p1223_3344",
+                    "buttons_id": [
+                        1,
+                        2,
+                        3
+                    ],
+                    "action": "link",
+                    "no_corusels_message": "bad request"
+                },
+                {
+                    "title": "title",
+                    "description": "description",
+                    "photo_id": "p1223_3344",
+                    "buttons": [
+                        4,
+                        6,
+                        2
+                    ],
+                    "action": "link",
+                    "no_corusels_message": "bad request"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "step_id": 0,
+            "message_id": 1,
+            "kit_buttons": [
+                {
+                    "line": 1,
+                    "buttons": [
+                        {
+                            "id": 1,
+                            "button_id": 1,
+                            "next_step_id": 2
+                        },
+                        {
+                            "id": 2,
+                            "button_id": 1,
+                            "next_step_id": 1
+                        }
+                    ]
+                },
+                {
+                    "line": 2,
+                    "buttons": [
+                        {
+                            "id": 1,
+                            "button_id": 4,
+                            "next_step_id": 7
+                        },
+                        {
+                            "id": 2,
+                            "button_id": 6,
+                            "next_step_id": 9
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "step_id": 2,
+            "message_id": 1,
+            "kit_buttons": [
+                {
+                    "line": 1,
+                    "buttons": [
+                        {
+                            "id": 1,
+                            "button_id": 1,
+                            "next_step_id": 2
+                        },
+                        {
+                            "id": 2,
+                            "button_id": 1,
+                            "next_step_id": 1
+                        }
+                    ]
+                },
+                {
+                    "line": 2,
+                    "buttons": [
+                        {
+                            "id": 1,
+                            "button_id": 4,
+                            "next_step_id": 7
+                        },
+                        {
+                            "id": 2,
+                            "button_id": 6,
+                            "next_step_id": 9
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
