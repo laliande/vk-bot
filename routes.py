@@ -16,7 +16,7 @@ def get_data_about_group():
             about_group = {'token': data['token'], 'group_id': data['group_id'],
                            'version_api': data['version_api']}
 
-            with open('data.json', 'w') as f:
+            with open('about_group.json', 'w') as f:
                 dump(about_group, f)
 
             return good_data
@@ -26,4 +26,15 @@ def get_data_about_group():
 
 @api.route('/sendDataAboutMessages', methods=['POST'])
 def get_data_about_messages():
-    pass
+    data = request.get_json()
+    if data is None:
+        return bad_mimetype
+    else:
+        try:
+            data['elements']
+            data['actions']
+            with open('about_bot.json', 'w') as f:
+                dump(data, f)
+            return good_data
+        except:
+            return bad_data
