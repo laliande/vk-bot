@@ -2,6 +2,7 @@ import requests
 from exceptions import InvalidData
 from time import sleep
 from random import randint
+import json
 
 URL = 'https://api.vk.com/method/'
 
@@ -109,7 +110,8 @@ class ScreenNow():
         self.message_id = 0
         self.method = 'messages.send'
         self.url = URL + self.method
-        self.message = ''
+        self.message = 'unknown request'
+        self.num_lines = 0
 
     def get_all_buttons_in_bot(self):
         all_buttons = []
@@ -129,10 +131,12 @@ class ScreenNow():
         kit_buttons_on_screen = []
         kit_id = []
         button = {}
+        self.num_lines = len(
+            self.answers['actions'][self.now_step_id]['kit_buttons'])
         for i in range(len(self.answers['actions'][self.now_step_id]['kit_buttons'])):
             for j in range(len(self.answers['actions'][self.now_step_id]['kit_buttons'][i]['buttons'])):
                 button = {'button_id': self.answers['actions'][self.now_step_id]['kit_buttons']
-                          [i]['buttons'][j]['button_id'], 'next_step': self.answers['actions'][self.now_step_id]['kit_buttons'][i]['buttons'][j]['next_step_id']}
+                          [i]['buttons'][j]['button_id'], 'next_step': self.answers['actions'][self.now_step_id]['kit_buttons'][i]['buttons'][j]['next_step_id'], "line": self.answers['actions'][self.now_step_id]['kit_buttons'][i]['line']}
                 kit_buttons_on_screen.append(button)
                 kit_id.append(self.answers['actions'][self.now_step_id]['kit_buttons']
                               [i]['buttons'][j]['button_id'])
@@ -144,7 +148,6 @@ class ScreenNow():
 
 
 #  change the screen number and update buttons
-
 
     def change_data_about_screen(self, message):
         self.user = message['from_id']
@@ -163,13 +166,34 @@ class ScreenNow():
         # print(self.message_id)
         # print(self.message)
 
+    def get_keyboard_for_send(self):
+        keyboard = {}
+        lines = []
+        for i in range(self.num_lines):
+            lines.append([])
+        keyboard.update(
+            {"one_time": self.kit_button_on_screen[0]["one_time"]})
+        keyboard.update(
+            {"inline": self.kit_button_on_screen[0]["inline"]})
+        # print(self.kit_button_on_screen)
+        for i in range(len(self.kit_button_on_screen)):
+            labal = self.kit_button_on_screen[i]["text"]
+            type_action = self.kit_button_on_screen[i]["action"]
+            action = {"action": {"type": type_action, "label": labal}}
+            color = {"color": self.kit_button_on_screen[i]["color"]}
+            action.update(color)
+            keyboard.update({"buttons": [[action]]})
+
+            lines[int(self.kit_button_on_screen[i]["line"]) -
+                  1].append(action)
+        keyboard.update({"buttons": lines})
+        return json.dumps(keyboard)
+
     def send_message(self, message, token, version_api):
+        keyboard = self.get_keyboard_for_send()
         self.change_data_about_screen(message=message)
-        print(self.now_screen)
-        print(self.message_id)
-        print(self.message)
         params = {'peer_id': self.user, 'random_id': randint(0, 65000),
-                  'message': self.message, 'access_token': token, 'v': version_api}
+                  'message': self.message, 'access_token': token, 'v': version_api, "keyboard": keyboard}
         requests.post(url=self.url, params=params)
 
 
@@ -179,12 +203,9 @@ class Answer(LongPollConnect):
         self.answers = answers
 
     def get_data_about_event(self, event):
-        keyboard = bool(event['updates'][0]['object']
-                        ['client_info']['keyboard'])
-        inline = bool(event['updates'][0]['object']
-                      ['client_info']['inline_keyboard'])
-        carousel = bool(event['updates'][0]
-                        ['object']['client_info']['carousel'])
+        keyboard = event['updates'][0]['object']['client_info']['keyboard']
+        inline = event['updates'][0]['object']['client_info']['inline_keyboard']
+        carousel = event['updates'][0]['object']['client_info']['carousel']
         from_id = event['updates'][0]['object']['message']['from_id']
         text = event['updates'][0]['object']['message']['text']
         return {"keyboard": keyboard, "inline": inline, "carousel": carousel, "from_id": from_id, "text": text}
@@ -192,7 +213,8 @@ class Answer(LongPollConnect):
     def send_answer(self, about_event):
         test = ScreenNow(answers=self.answers)
         test.get_kit_button_on_screen()
-        test.change_data_about_screen(message=about_event)
+        test.send_message(message=about_event, token=self.token,
+                          version_api=self.version_api)
 
     def process_message(self):
         while True:
@@ -200,3 +222,5 @@ class Answer(LongPollConnect):
             about_event = self.get_data_about_event(event=self.data[0])
             self.send_answer(about_event=about_event)
             self.delite(forced=True)
+
+
