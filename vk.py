@@ -1,6 +1,7 @@
 import requests
 from exceptions import InvalidData
 from time import sleep
+from random import randint
 
 URL = 'https://api.vk.com/method/'
 
@@ -105,6 +106,10 @@ class ScreenNow():
         self.all_buttons = self.get_all_buttons_in_bot()
         self.kit_button_on_screen = []
         self.user = ''
+        self.message_id = 0
+        self.method = 'messages.send'
+        self.url = URL + self.method
+        self.message = ''
 
     def get_all_buttons_in_bot(self):
         all_buttons = []
@@ -140,14 +145,32 @@ class ScreenNow():
 
 #  change the screen number and update buttons
 
+
     def change_data_about_screen(self, message):
-        print(self.kit_button_on_screen)
         self.user = message['from_id']
         for i in range(len(self.kit_button_on_screen)):
             if message['text'] == self.kit_button_on_screen[i]['text']:
                 self.now_screen = self.kit_button_on_screen[i]['next_step']
+                self.get_now_step_in_all_answers()
+                self.message_id = self.answers['actions'][self.now_step_id]['message_id']
                 break
         self.get_kit_button_on_screen()
+
+        for i in range(len(self.answers['elements'][0]['messages'])):
+            if self.answers['elements'][0]['messages'][i]['message_id'] == self.message_id:
+                self.message = self.answers['elements'][0]['messages'][i]['text']
+                break
+        # print(self.message_id)
+        # print(self.message)
+
+    def send_message(self, message, token, version_api):
+        self.change_data_about_screen(message=message)
+        print(self.now_screen)
+        print(self.message_id)
+        print(self.message)
+        params = {'peer_id': self.user, 'random_id': randint(0, 65000),
+                  'message': self.message, 'access_token': token, 'v': version_api}
+        requests.post(url=self.url, params=params)
 
 
 class Answer(LongPollConnect):
@@ -164,10 +187,12 @@ class Answer(LongPollConnect):
                         ['object']['client_info']['carousel'])
         from_id = event['updates'][0]['object']['message']['from_id']
         text = event['updates'][0]['object']['message']['text']
-        return [keyboard, inline, carousel, from_id, text]
+        return {"keyboard": keyboard, "inline": inline, "carousel": carousel, "from_id": from_id, "text": text}
 
     def send_answer(self, about_event):
-        print(about_event)
+        test = ScreenNow(answers=self.answers)
+        test.get_kit_button_on_screen()
+        test.change_data_about_screen(message=about_event)
 
     def process_message(self):
         while True:
