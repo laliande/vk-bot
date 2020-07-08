@@ -97,6 +97,32 @@ class LongPollConnect():
             self.data.pop(num)
 
 
+class ScreenNow():
+    def __init__(self, from_id, message, answers):
+        self.from_id = from_id
+        self.answers = answers
+        self.message = message
+        self.now_screen = 0
+
+    def get_kit_button(self):
+        kit_buttons = []
+        now_step_id = 0
+        for i in range(len(self.answers['actions'])):
+            if self.answers['actions'][i]['step_id'] == self.now_screen:
+                now_step_id = i
+                break
+        for i in range(len(self.answers['actions'][now_step_id]['kit_buttons'])):
+            for j in range(len(self.answers['actions'][now_step_id]['kit_buttons'][i]['buttons'])):
+                kit_buttons.append({'id_button': self.answers['actions'][now_step_id]['kit_buttons']
+                                    [i]['buttons'][j]['button_id'], 'next_step': self.answers['actions'][now_step_id]['kit_buttons'][i]['buttons'][j]['next_step_id']})
+        self.kit_buttons = kit_buttons
+        # DEBUG
+        # for i in range(len(kit_buttons)):
+        #     print("i = " + str(i))
+        #     print("id button = " + str(kit_buttons[i]['id_button']))
+        #     print("id next = " + str(kit_buttons[i]['next_step']))
+
+
 class Answer(LongPollConnect):
     def __init__(self, answers, token, group_id, version_api):
         super().__init__(token=token, version_api=version_api, group_id=group_id)
@@ -104,11 +130,11 @@ class Answer(LongPollConnect):
 
     def get_data_about_event(self, event):
         keyboard = bool(event['updates'][0]['object']
-                             ['client_info']['keyboard'])
+                        ['client_info']['keyboard'])
         inline = bool(event['updates'][0]['object']
-                           ['client_info']['inline_keyboard'])
+                      ['client_info']['inline_keyboard'])
         carousel = bool(event['updates'][0]
-                             ['object']['client_info']['carousel'])
+                        ['object']['client_info']['carousel'])
         from_id = event['updates'][0]['object']['message']['from_id']
         text = event['updates'][0]['object']['message']['text']
         return [keyboard, inline, carousel, from_id, text]
