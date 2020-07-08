@@ -98,29 +98,56 @@ class LongPollConnect():
 
 
 class ScreenNow():
-    def __init__(self, from_id, message, answers):
-        self.from_id = from_id
+    def __init__(self, answers):
         self.answers = answers
-        self.message = message
         self.now_screen = 0
+        self.get_all_buttons_in_bot()
+        self.all_buttons = self.get_all_buttons_in_bot()
+        self.kit_button_on_screen = []
+        self.user = ''
 
-    def get_kit_button(self):
-        kit_buttons = []
-        now_step_id = 0
+    def get_all_buttons_in_bot(self):
+        all_buttons = []
+        for i in range(len(self.answers['elements'][0]['buttons'])):
+            all_buttons.append(self.answers['elements'][0]['buttons'][i])
+        return all_buttons
+
+# get id in list steps
+    def get_now_step_in_all_answers(self):
         for i in range(len(self.answers['actions'])):
             if self.answers['actions'][i]['step_id'] == self.now_screen:
-                now_step_id = i
+                self.now_step_id = i
                 break
-        for i in range(len(self.answers['actions'][now_step_id]['kit_buttons'])):
-            for j in range(len(self.answers['actions'][now_step_id]['kit_buttons'][i]['buttons'])):
-                kit_buttons.append({'id_button': self.answers['actions'][now_step_id]['kit_buttons']
-                                    [i]['buttons'][j]['button_id'], 'next_step': self.answers['actions'][now_step_id]['kit_buttons'][i]['buttons'][j]['next_step_id']})
-        self.kit_buttons = kit_buttons
-        # DEBUG
-        # for i in range(len(kit_buttons)):
-        #     print("i = " + str(i))
-        #     print("id button = " + str(kit_buttons[i]['id_button']))
-        #     print("id next = " + str(kit_buttons[i]['next_step']))
+
+    def get_kit_button_on_screen(self):
+        self.get_now_step_in_all_answers()
+        kit_buttons_on_screen = []
+        kit_id = []
+        button = {}
+        for i in range(len(self.answers['actions'][self.now_step_id]['kit_buttons'])):
+            for j in range(len(self.answers['actions'][self.now_step_id]['kit_buttons'][i]['buttons'])):
+                button = {'button_id': self.answers['actions'][self.now_step_id]['kit_buttons']
+                          [i]['buttons'][j]['button_id'], 'next_step': self.answers['actions'][self.now_step_id]['kit_buttons'][i]['buttons'][j]['next_step_id']}
+                kit_buttons_on_screen.append(button)
+                kit_id.append(self.answers['actions'][self.now_step_id]['kit_buttons']
+                              [i]['buttons'][j]['button_id'])
+        for i in range(len(self.all_buttons)):
+            for j in range(len(kit_buttons_on_screen)):
+                if self.all_buttons[i]['button_id'] == kit_buttons_on_screen[j]['button_id']:
+                    kit_buttons_on_screen[j].update(self.all_buttons[i])
+        self.kit_button_on_screen = kit_buttons_on_screen
+
+
+#  change the screen number and update buttons
+
+    def change_data_about_screen(self, message):
+        print(self.kit_button_on_screen)
+        self.user = message['from_id']
+        for i in range(len(self.kit_button_on_screen)):
+            if message['text'] == self.kit_button_on_screen[i]['text']:
+                self.now_screen = self.kit_button_on_screen[i]['next_step']
+                break
+        self.get_kit_button_on_screen()
 
 
 class Answer(LongPollConnect):
