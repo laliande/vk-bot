@@ -73,7 +73,8 @@ class LongPollConnect():
                     print('faild3')
                     print()
             except:
-                return self.data.append(data)
+                if data['updates'] != []:
+                    return self.data.append(data)
 
     def __iter__(self):
         return self
@@ -95,6 +96,8 @@ class LongPollConnect():
     def delite(self, forced=False, num=0):
         if len(self.data) >= self.limit:
             self.data.pop(0)
+        # elif len(self.data) != 0 and self.data[0]['updates'] == []:
+        #     self.data.pop(0)
         elif forced:
             self.data.pop(num)
 
@@ -149,6 +152,7 @@ class ScreenNow():
 
 #  change the screen number and update buttons
 
+
     def change_data_about_screen(self, message):
         self.user = message['from_id']
         for i in range(len(self.kit_button_on_screen)):
@@ -201,6 +205,7 @@ class Answer(LongPollConnect):
     def __init__(self, answers, token, group_id, version_api):
         super().__init__(token=token, version_api=version_api, group_id=group_id)
         self.answers = answers
+        self.connections = []
 
     def get_data_about_event(self, event):
         keyboard = event['updates'][0]['object']['client_info']['keyboard']
@@ -210,17 +215,34 @@ class Answer(LongPollConnect):
         text = event['updates'][0]['object']['message']['text']
         return {"keyboard": keyboard, "inline": inline, "carousel": carousel, "from_id": from_id, "text": text}
 
+    def new_connect(self):
+        connect = ScreenNow(answers=self.answers)
+        return connect
+
     def send_answer(self, about_event):
-        test = ScreenNow(answers=self.answers)
-        test.get_kit_button_on_screen()
-        test.send_message(message=about_event, token=self.token,
-                          version_api=self.version_api)
+        connect = []
+
+        for i in range(len(self.connections)):
+            if self.connections[i]["from_id"] == about_event["from_id"]:
+                connect.append(self.connections[i]['connect'])
+                break
+        if len(connect) == 0:
+            new_connect = self.new_connect()
+            new_connect.get_kit_button_on_screen()
+            self.connections.append(
+                {"from_id": about_event["from_id"], "connect": new_connect})
+            new_connect.send_message(message=about_event, token=self.token,
+                                     version_api=self.version_api)
+        else:
+            connect[0].send_message(message=about_event, token=self.token,
+                                    version_api=self.version_api)
 
     def process_message(self):
         while True:
             next(self)
-            about_event = self.get_data_about_event(event=self.data[0])
-            self.send_answer(about_event=about_event)
-            self.delite(forced=True)
-
-
+            try:
+                about_event = self.get_data_about_event(event=self.data[0])
+                self.send_answer(about_event=about_event)
+                self.delite(forced=True)
+            except:
+                sleep(1)
