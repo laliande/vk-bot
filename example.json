@@ -1,14 +1,52 @@
 {
+    "about_group": {
+        "token": "111546546546546546546541",
+        "group_id": "187000000",
+        "version_api": "5.120"
+    },
     "elements": [
         {
             "buttons": [
                 {
                     "button_id": 1,
-                    "type": "inline",
+                    "inline": true,
                     "color": "primary",
-                    "text": "text",
+                    "text": "button1",
                     "link": "link",
-                    "one_time": "False",
+                    "one_time": false,
+                    "action": "text",
+                    "if_no_button_type": "standart",
+                    "if_no_button": 1
+                },
+                {
+                    "button_id": 2,
+                    "inline": true,
+                    "color": "primary",
+                    "text": "button2",
+                    "link": "link",
+                    "one_time": false,
+                    "action": "text",
+                    "if_no_button_type": "standart",
+                    "if_no_button": 1
+                },
+                {
+                    "button_id": 3,
+                    "inline": true,
+                    "color": "primary",
+                    "text": "button3",
+                    "link": "link",
+                    "one_time": false,
+                    "action": "text",
+                    "if_no_button_type": "standart",
+                    "if_no_button": 1
+                },
+                {
+                    "button_id": 4,
+                    "inline": true,
+                    "color": "primary",
+                    "text": "button4",
+                    "link": "link",
+                    "one_time": false,
                     "action": "text",
                     "if_no_button_type": "standart",
                     "if_no_button": 1
@@ -17,34 +55,18 @@
             "messages": [
                 {
                     "message_id": 1,
-                    "text": "some text",
-                    "attach": "attach"
-                }
-            ],
-            "corusels": [
-                {
-                    "title": "title",
-                    "description": "description",
-                    "photo_id": "p1223_3344",
-                    "buttons_id": [
-                        1,
-                        2,
-                        3
-                    ],
-                    "action": "link",
-                    "no_corusels_message": "bad request"
+                    "text": "screen 1",
+                    "attach": ""
                 },
                 {
-                    "title": "title",
-                    "description": "description",
-                    "photo_id": "p1223_3344",
-                    "buttons": [
-                        4,
-                        6,
-                        2
-                    ],
-                    "action": "link",
-                    "no_corusels_message": "bad request"
+                    "message_id": 2,
+                    "text": "screen 2",
+                    "attach": ""
+                },
+                {
+                    "message_id": 3,
+                    "text": "screen 3",
+                    "attach": "photo226523848_456239446"
                 }
             ]
         }
@@ -61,11 +83,6 @@
                             "id": 1,
                             "button_id": 1,
                             "next_step_id": 2
-                        },
-                        {
-                            "id": 2,
-                            "button_id": 1,
-                            "next_step_id": 1
                         }
                     ]
                 },
@@ -74,13 +91,13 @@
                     "buttons": [
                         {
                             "id": 1,
-                            "button_id": 4,
-                            "next_step_id": 7
+                            "button_id": 3,
+                            "next_step_id": 2
                         },
                         {
                             "id": 2,
-                            "button_id": 6,
-                            "next_step_id": 9
+                            "button_id": 4,
+                            "next_step_id": 2
                         }
                     ]
                 }
@@ -88,7 +105,7 @@
         },
         {
             "step_id": 2,
-            "message_id": 1,
+            "message_id": 2,
             "kit_buttons": [
                 {
                     "line": 1,
@@ -96,12 +113,12 @@
                         {
                             "id": 1,
                             "button_id": 1,
-                            "next_step_id": 2
+                            "next_step_id": 3
                         },
                         {
                             "id": 2,
-                            "button_id": 1,
-                            "next_step_id": 1
+                            "button_id": 2,
+                            "next_step_id": 3
                         }
                     ]
                 },
@@ -110,13 +127,49 @@
                     "buttons": [
                         {
                             "id": 1,
-                            "button_id": 4,
-                            "next_step_id": 7
+                            "button_id": 3,
+                            "next_step_id": 3
                         },
                         {
                             "id": 2,
-                            "button_id": 6,
-                            "next_step_id": 9
+                            "button_id": 4,
+                            "next_step_id": 3
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "step_id": 3,
+            "message_id": 3,
+            "kit_buttons": [
+                {
+                    "line": 1,
+                    "buttons": [
+                        {
+                            "id": 1,
+                            "button_id": 1,
+                            "next_step_id": 0
+                        },
+                        {
+                            "id": 2,
+                            "button_id": 2,
+                            "next_step_id": 0
+                        }
+                    ]
+                },
+                {
+                    "line": 2,
+                    "buttons": [
+                        {
+                            "id": 1,
+                            "button_id": 3,
+                            "next_step_id": 0
+                        },
+                        {
+                            "id": 2,
+                            "button_id": 4,
+                            "next_step_id": 0
                         }
                     ]
                 }
