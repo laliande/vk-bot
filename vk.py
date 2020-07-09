@@ -119,6 +119,7 @@ class ScreenNow():
         self.url = URL + self.method
         self.message = 'unknown request'
         self.num_lines = 0
+        self.attach = ''
 
 # gets data about all bot buttons that are set in standard responses
 # output: all buttons (list)
@@ -173,6 +174,7 @@ class ScreenNow():
         for i in range(len(self.answers['elements'][0]['messages'])):
             if self.answers['elements'][0]['messages'][i]['message_id'] == self.message_id:
                 self.message = self.answers['elements'][0]['messages'][i]['text']
+                self.attach = self.answers['elements'][0]['messages'][i]['attach']
                 break
 
 # generates a keyboard array for sending data to the user
@@ -205,7 +207,7 @@ class ScreenNow():
         keyboard = self.get_keyboard_for_send()
         self.change_data_about_screen(message=message)
         params = {'peer_id': self.user, 'random_id': randint(0, 65000),
-                  'message': self.message, 'access_token': token, 'v': version_api, "keyboard": keyboard}
+                  'message': self.message, 'access_token': token, 'v': version_api, "keyboard": keyboard, "attachment": self.attach}
         requests.post(url=self.url, params=params)
 
 # receives data about new messages and sends them to fix the current state of the user's screen and send messages to users
