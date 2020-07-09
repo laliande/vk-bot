@@ -199,6 +199,7 @@ class ScreenNow():
             lines[int(self.kit_button_on_screen[i]["line"]) -
                   1].append(action)
         keyboard.update({"buttons": lines})
+        print(keyboard)
         return json.dumps(keyboard)
 
 # sends a message to the user
@@ -215,13 +216,17 @@ class ScreenNow():
 
 
 class Answer(LongPollConnect):
-    def __init__(self, answers, token, group_id, version_api):
-        super().__init__(token=token, version_api=version_api, group_id=group_id)
+    def __init__(self, answers):
+        super().__init__(token=answers["about_group"]["token"], version_api=answers["about_group"]
+                         ["version_api"], group_id=answers["about_group"]["group_id"])
         self.answers = answers
         self.connections = []
 
+
 # processing data about the current event-gets the necessary information
 # input: data about event (dict)
+
+
     def get_data_about_event(self, event):
         keyboard = event['updates'][0]['object']['client_info']['keyboard']
         inline = event['updates'][0]['object']['client_info']['inline_keyboard']
@@ -253,6 +258,7 @@ class Answer(LongPollConnect):
         else:
             connect[0].send_message(message=about_event, token=self.token,
                                     version_api=self.version_api)
+        print(connect)
 
 # processes the receipt of new events and sends them for processing
     def process_message(self):
