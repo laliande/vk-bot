@@ -12,6 +12,7 @@ URL = 'https://api.vk.com/method/'
 
 
 class LongPollConnect():
+
     # returns data for connection
     # output: data for API connection (dict)
     def get_data_for_connect(self):
@@ -101,6 +102,9 @@ class LongPollConnect():
         elif forced:
             self.data.pop(num)
 
+# monitors the current state of the user's screen: messages and buttons that are currently displayed
+# input: data about default answers (json)
+
 
 class ScreenNow():
     def __init__(self, answers):
@@ -116,19 +120,23 @@ class ScreenNow():
         self.message = 'unknown request'
         self.num_lines = 0
 
+# gets data about all bot buttons that are set in standard responses
+# output: all buttons (list)
     def get_all_buttons_in_bot(self):
         all_buttons = []
         for i in range(len(self.answers['elements'][0]['buttons'])):
             all_buttons.append(self.answers['elements'][0]['buttons'][i])
         return all_buttons
 
-# get id in list steps
+# gets the ID of the current user screen for easy iteration over the array
+# output: id (int)
     def get_now_step_in_all_answers(self):
         for i in range(len(self.answers['actions'])):
             if self.answers['actions'][i]['step_id'] == self.now_screen:
                 self.now_step_id = i
                 break
 
+# gets a set of buttons that are currently displayed on the user's screen
     def get_kit_button_on_screen(self):
         self.get_now_step_in_all_answers()
         kit_buttons_on_screen = []
@@ -150,8 +158,8 @@ class ScreenNow():
         self.kit_button_on_screen = kit_buttons_on_screen
 
 
-#  change the screen number and update buttons
-
+# updates information about the status of buttons on the user's screen when the user clicks on one of the buttons
+# input: message from connect with API vk
 
     def change_data_about_screen(self, message):
         self.user = message['from_id']
@@ -162,14 +170,13 @@ class ScreenNow():
                 self.message_id = self.answers['actions'][self.now_step_id]['message_id']
                 break
         self.get_kit_button_on_screen()
-
         for i in range(len(self.answers['elements'][0]['messages'])):
             if self.answers['elements'][0]['messages'][i]['message_id'] == self.message_id:
                 self.message = self.answers['elements'][0]['messages'][i]['text']
                 break
-        # print(self.message_id)
-        # print(self.message)
 
+# generates a keyboard array for sending data to the user
+# output: array keyboard (json)
     def get_keyboard_for_send(self):
         keyboard = {}
         lines = []
@@ -187,18 +194,22 @@ class ScreenNow():
             color = {"color": self.kit_button_on_screen[i]["color"]}
             action.update(color)
             keyboard.update({"buttons": [[action]]})
-
             lines[int(self.kit_button_on_screen[i]["line"]) -
                   1].append(action)
         keyboard.update({"buttons": lines})
         return json.dumps(keyboard)
 
+# sends a message to the user
+# input: message from API VK (json), token (str), version_api (str)
     def send_message(self, message, token, version_api):
         keyboard = self.get_keyboard_for_send()
         self.change_data_about_screen(message=message)
         params = {'peer_id': self.user, 'random_id': randint(0, 65000),
                   'message': self.message, 'access_token': token, 'v': version_api, "keyboard": keyboard}
         requests.post(url=self.url, params=params)
+
+# receives data about new messages and sends them to fix the current state of the user's screen and send messages to users
+# input: default answers (json), token (str), group_id (str or int), version_api (str)
 
 
 class Answer(LongPollConnect):
@@ -207,6 +218,8 @@ class Answer(LongPollConnect):
         self.answers = answers
         self.connections = []
 
+# processing data about the current event-gets the necessary information
+# input: data about event (dict)
     def get_data_about_event(self, event):
         keyboard = event['updates'][0]['object']['client_info']['keyboard']
         inline = event['updates'][0]['object']['client_info']['inline_keyboard']
@@ -215,13 +228,15 @@ class Answer(LongPollConnect):
         text = event['updates'][0]['object']['message']['text']
         return {"keyboard": keyboard, "inline": inline, "carousel": carousel, "from_id": from_id, "text": text}
 
+# create new connect
+# input:class instance
     def new_connect(self):
         connect = ScreenNow(answers=self.answers)
         return connect
 
+# decides who to send the response to and sends it to
     def send_answer(self, about_event):
         connect = []
-
         for i in range(len(self.connections)):
             if self.connections[i]["from_id"] == about_event["from_id"]:
                 connect.append(self.connections[i]['connect'])
@@ -237,6 +252,7 @@ class Answer(LongPollConnect):
             connect[0].send_message(message=about_event, token=self.token,
                                     version_api=self.version_api)
 
+# processes the receipt of new events and sends them for processing
     def process_message(self):
         while True:
             next(self)
