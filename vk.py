@@ -199,7 +199,6 @@ class ScreenNow():
             lines[int(self.kit_button_on_screen[i]["line"]) -
                   1].append(action)
         keyboard.update({"buttons": lines})
-        print(keyboard)
         return json.dumps(keyboard)
 
 # sends a message to the user
@@ -258,7 +257,6 @@ class Answer(LongPollConnect):
         else:
             connect[0].send_message(message=about_event, token=self.token,
                                     version_api=self.version_api)
-        print(connect)
 
 # processes the receipt of new events and sends them for processing
     def process_message(self):
