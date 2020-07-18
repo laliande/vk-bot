@@ -162,6 +162,7 @@ class ScreenNow():
 # updates information about the status of buttons on the user's screen when the user clicks on one of the buttons
 # input: message from connect with API vk
 
+
     def change_data_about_screen(self, message):
         self.user = message['from_id']
         for i in range(len(self.kit_button_on_screen)):
@@ -225,7 +226,6 @@ class Answer(LongPollConnect):
 # processing data about the current event-gets the necessary information
 # input: data about event (dict)
 
-
     def get_data_about_event(self, event):
         keyboard = event['updates'][0]['object']['client_info']['keyboard']
         inline = event['updates'][0]['object']['client_info']['inline_keyboard']
@@ -260,11 +260,10 @@ class Answer(LongPollConnect):
 
 # processes the receipt of new events and sends them for processing
     def process_message(self):
-        while True:
-            next(self)
-            try:
-                about_event = self.get_data_about_event(event=self.data[0])
-                self.send_answer(about_event=about_event)
-                self.delite(forced=True)
-            except:
-                sleep(1)
+        next(self)
+        try:
+            about_event = self.get_data_about_event(event=self.data[0])
+            self.send_answer(about_event=about_event)
+            self.delite(forced=True)
+        except:
+            sleep(1)
