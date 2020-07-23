@@ -12,15 +12,15 @@ def check_file():
 
 credentials = pika.PlainCredentials('guest', 'guest')
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost',
-                                                               5000,
+                                                               5672,
                                                                '/',
                                                                credentials))
-
 channel = connection.channel()
 
 
 while True:
     method_frame, header_frame, body = channel.basic_get('my_queue')
+    print(body)
     if method_frame:
         try:
             data = check_file()
