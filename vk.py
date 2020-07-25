@@ -3,6 +3,7 @@ from exceptions import InvalidData
 from time import sleep
 from random import randint
 import json
+import time
 
 URL = 'https://api.vk.com/method/'
 
@@ -37,6 +38,7 @@ class LongPollConnect():
         self.connect = self.get_data_for_connect()
         self.data = []
         self.limit = limit
+        self.flag_for_remove = False
 
     # check and return an event about new messages in the chat
     # output: API data about new event (dict)
@@ -52,6 +54,7 @@ class LongPollConnect():
     def process_new_event(self):
         while True:
             data = self.check_new_event()
+            print(data.json())
             new_ts = int(self.connect['ts']) + 1
             self.connect['ts'] = str(new_ts)
             data = data.json()
@@ -60,22 +63,30 @@ class LongPollConnect():
                 if failed == 1:
                     new_ts = data['ts']
                     self.connect['ts'] = new_ts
-                    print('faild1')
-                elif failed == 2:
-                    new_key = get_data_for_connect['key']
-                    self.connect['key'] = new_key
-                    print('faild2')
-                    print()
+                    #print('faild1')
+                #elif failed == 2:
+                #    new_key = get_data_for_connect['key']
+                #    self.connect['key'] = new_key
+                #    print('faild2')
+                #    print()
                 else:
-                    new_key = get_data_for_connect['key']
-                    new_ts = get_data_for_connect['ts']
-                    self.connect['key'] = new_key
-                    self.connect['ts'] = new_ts
-                    print('faild3')
-                    print()
+               #     new_key = get_data_for_connect['key']
+               #     new_ts = get_data_for_connect['ts']
+               #     self.connect['key'] = new_key
+               #     self.connect['ts'] = new_ts
+               #     print('faild3')
+               #     print()
+                     self.connect = self.get_data_for_connect()
+                     #continue
             except:
-                if data['updates'] != []:
-                    return self.data.append(data)
+                if data['updates']:
+                    if data['updates'] != []:
+                        if data['updates'][0]['type'] == 'message_new':
+                            return self.data.append(data)
+                else:
+                    self.connect = self.get_data_for_connect()
+                    self.flag_for_remove = True
+                    #continue
 
     def __iter__(self):
         return self
@@ -246,24 +257,33 @@ class Answer(LongPollConnect):
         for i in range(len(self.connections)):
             if self.connections[i]["from_id"] == about_event["from_id"]:
                 connect.append(self.connections[i]['connect'])
+                self.connections[i]['time'] = time.time()
                 break
         if len(connect) == 0:
             new_connect = self.new_connect()
             new_connect.get_kit_button_on_screen()
             self.connections.append(
-                {"from_id": about_event["from_id"], "connect": new_connect})
+                    {"from_id": about_event["from_id"], "connect": new_connect, 'time': time.time()})
             new_connect.send_message(message=about_event, token=self.token,
                                      version_api=self.version_api)
         else:
             connect[0].send_message(message=about_event, token=self.token,
                                     version_api=self.version_api)
+    
+    def clear_list_users(self):
+        time_now = time.time()
+        for i in range(len(self.connections)):
+            if time_now - self.connections[i]['time'] >= 30:
+                self.connections.pop(i)
+                print('remove: ' + str(self.connections[i]['from_id']))
 
 # processes the receipt of new events and sends them for processing
     def process_message(self):
         next(self)
         try:
             about_event = self.get_data_about_event(event=self.data[0])
-            self.send_answer(about_event=about_event)
             self.delite(forced=True)
+            self.send_answer(about_event=about_event)
+            self.clear_list_users()
         except:
             sleep(1)
