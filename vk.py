@@ -273,7 +273,7 @@ class Answer(LongPollConnect):
     def clear_list_users(self):
         time_now = time.time()
         for i in range(len(self.connections)):
-            if time_now - self.connections[i]['time'] >= 30:
+            if time_now - self.connections[i]['time'] >= 600:
                 self.connections.pop(i)
                 print('remove: ' + str(self.connections[i]['from_id']))
 
