@@ -13,7 +13,9 @@ def check_file():
 while True:
     credentials = pika.PlainCredentials('guest', 'guest')
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672, '/', credentials))
+
     channel = connection.channel()
+    channel.queue_declare(queue='my_queue')
     method_frame, header_frame, body = channel.basic_get('my_queue')
     if method_frame:
         data = check_file()
@@ -25,8 +27,8 @@ while True:
         connection.close()
         try:
             answer.process_message()
-            print('try')
-        except:
-            print('sleep')
+#            print('try')
+        except Exception as ex:
+            print(ex)
             sleep(1)
                                                                                                                                     
