@@ -1,34 +1,25 @@
-import pika
-import pika
+import threading
 from vk import Answer
-import json
-from time import sleep
+
+import time
+import random
+
+groups = set()
 
 
-def check_file():
-    with open("answers.json") as file:
-        data = json.load(file)
-        return data
+def worker(data, group_id):
+    answer = Answer(data)
+    while group_id in groups:
+        answer.process_message()
 
-while True:
-    credentials = pika.PlainCredentials('guest', 'guest')
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672, '/', credentials))
 
-    channel = connection.channel()
-    channel.queue_declare(queue='my_queue')
-    method_frame, header_frame, body = channel.basic_get('my_queue')
-    if method_frame:
-        data = check_file()
-        answer = Answer(data)
-        print(method_frame, header_frame, body)
-        channel.basic_ack(method_frame.delivery_tag)
+def start(data, group_id, action):
+    if action == 'start':
+        t = threading.Thread(target=worker, args=(data, group_id))
+        groups.add(group_id)
+        t.start()
+    elif action == 'stop':
+        groups.discard(group_id)
+
     else:
-        channel.close()
-        connection.close()
-        try:
-            answer.process_message()
-#            print('try')
-        except Exception as ex:
-            print(ex)
-            sleep(1)
-                                                                                                                                    
+        return "bad action"
