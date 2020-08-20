@@ -47,5 +47,7 @@ def start_and_stop_bot():
     answers = requests.get(url='http://localhost:5000/api/v1.0/mock-get-answers',
                            params={'token': token, 'group_id': group_id})
     answers = answers.json()
-    start(answers, group_id, action)
-    return good_data
+    run_bot = start(answers, group_id, action)
+    if run_bot is None:
+        return good_data
+    return run_bot
