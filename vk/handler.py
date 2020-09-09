@@ -1,8 +1,7 @@
 class Handler():
-    # get event and add it in queue
-    def add_in_queue(self):
-        pass
-
+    def __init__(self, task_data):
+        self.type_connect = task_data['type_connect']
     # run worker
+
     def get_from_queue(self):
         pass
